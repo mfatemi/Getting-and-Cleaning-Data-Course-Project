@@ -10,7 +10,7 @@
 #5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 ##########################################################################################################
 
-library(plyr)
+
 
 
 ## load all data
@@ -42,23 +42,23 @@ colnames(xtest)       = features[,2];
 colnames(ytest)       = "activityId";
 testdata = cbind(ytest,subjecttest,xtest);
 
-alldata = rbind(traindata,testdata);
+alldataWithAllVars = rbind(traindata,testdata);
 
 # 
 # 2. Extract only the measurements on the mean and standard deviation for each measurement
 ###############################################################################
 
 # get only columns with mean() or std() in their names
-mean_and_std_Cols <- grepl("-(mean|std)", colnames(alldata))
+mean_and_std_Cols <- grepl("(mean|std|activity|subject)", colnames(alldataWithAllVars))
 # View(mean_and_std_Cols)
-alldata <- alldata[,mean_and_std_Cols]
+alldata <- alldataWithAllVars[,mean_and_std_Cols]
 
 
 #3. Uses descriptive activity names to name the activities in the data set
 ###############################################################################
 colnames(activityLables)  = c('activityId','activityLabel')
 #add  activity label
-alldata = merge(alldata,activityType,by='activityId',all.x=TRUE);
+alldata = merge(alldata,activityLables,by='activityId',all.x=TRUE);
 
 #4. Appropriately labels the data set with descriptive variable names. 
 ###############################################################################
@@ -70,9 +70,23 @@ names(alldata) <- gsub('Acc',"Acceleration",names(alldata))
 names(alldata) <- gsub('GyroJerk',"AngularAcceleration",names(alldata))
 names(alldata) <- gsub('Gyro',"AngularSpeed",names(alldata))
 names(alldata) <- gsub('Mag',"Magnitude",names(alldata))
-names(alldata) <- gsub('^t',"TimeDomain.",names(alldata))
-names(alldata) <- gsub('^f',"FrequencyDomain.",names(alldata))
-names(alldata) <- gsub('\\.mean',".Mean",names(alldata))
-names(alldata) <- gsub('\\.std',".StandardDeviation",names(alldata))
+names(alldata) <- gsub('^t',"Time",names(alldata))
+names(alldata) <- gsub('^f',"Frequency.",names(alldata))
+names(alldata) <- gsub('\\-mean',"Mean",names(alldata))
+names(alldata) <- gsub('\\-std',".StandardDeviation",names(alldata))
 names(alldata) <- gsub('Freq\\.',"Frequency.",names(alldata))
 names(alldata) <- gsub('Freq$',"Frequency",names(alldata))
+
+#5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+##########################################################################################################
+# filter  activityType column
+alldata_NoActivityType  = alldata[,names(alldata) != 'activityType'];
+
+# Summarizing the table to include just the mean of each variable for each activity and each subject
+tidyData    = aggregate(alldata_NoActivityType[,names(alldata_NoActivityType) != c('activityId','subjectId')],by=list(activityId=alldata_NoActivityType$activityId,subjectId = alldata_NoActivityType$subjectId),mean);
+
+# Merge data
+tidyData    = merge(tidyData,activityLables,by='activityId',all.x=TRUE);
+
+# write data
+write.table(tidyData, './tidyData.txt',row.names=TRUE,sep='\t');
