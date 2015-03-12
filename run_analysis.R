@@ -62,25 +62,26 @@ alldata = merge(alldata,activityLables,by='activityId',all.x=TRUE);
 
 #4. Appropriately labels the data set with descriptive variable names. 
 ###############################################################################
+
 # Remove parentheses
 names(alldata) <- gsub('\\(|\\)',"",names(alldata))    
 
 #create descriptive names
+names(alldata) <- gsub('^t',"Time",names(alldata))
+names(alldata) <- gsub('^f',"Frequency.",names(alldata))
+names(alldata) <- gsub('Freq\\.',"Frequency.",names(alldata))
+names(alldata) <- gsub('Freq$',"Frequency",names(alldata))
+names(alldata) <- gsub('\\-mean',"Mean",names(alldata))
+names(alldata) <- gsub('\\-std',".StandardDev",names(alldata))
 names(alldata) <- gsub('Acc',"Acceleration",names(alldata))
 names(alldata) <- gsub('GyroJerk',"AngularAcceleration",names(alldata))
 names(alldata) <- gsub('Gyro',"AngularSpeed",names(alldata))
 names(alldata) <- gsub('Mag',"Magnitude",names(alldata))
-names(alldata) <- gsub('^t',"Time",names(alldata))
-names(alldata) <- gsub('^f',"Frequency.",names(alldata))
-names(alldata) <- gsub('\\-mean',"Mean",names(alldata))
-names(alldata) <- gsub('\\-std',".StandardDeviation",names(alldata))
-names(alldata) <- gsub('Freq\\.',"Frequency.",names(alldata))
-names(alldata) <- gsub('Freq$',"Frequency",names(alldata))
 
 #5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 ##########################################################################################################
-# filter  activityType column
-alldata_NoActivityType  = alldata[,names(alldata) != 'activityType'];
+# filter  activityLabel column
+alldata_NoActivityType  = alldata[,names(alldata) != 'activityLabel'];
 
 # Summarizing the table to include just the mean of each variable for each activity and each subject
 tidyData    = aggregate(alldata_NoActivityType[,names(alldata_NoActivityType) != c('activityId','subjectId')],by=list(activityId=alldata_NoActivityType$activityId,subjectId = alldata_NoActivityType$subjectId),mean);
@@ -88,5 +89,5 @@ tidyData    = aggregate(alldata_NoActivityType[,names(alldata_NoActivityType) !=
 # Merge data
 tidyData    = merge(tidyData,activityLables,by='activityId',all.x=TRUE);
 
-# write data
+# write data to file
 write.table(tidyData, './tidyData.txt',row.names=TRUE,sep='\t');
