@@ -27,7 +27,7 @@ features     = read.table('features.txt',header=FALSE)
 activityLables = read.table('activity_labels.txt',header=FALSE);
 
 
-# Merges the training and the test sets to create one data set.
+# step 1 Merges the training and the test sets to create one data set.
 ###############################################################################
 ## merge  data
 colnames(subjecttrain)  = "subjectId";
@@ -67,24 +67,25 @@ alldata = merge(alldata,activityLables,by='activityId',all.x=TRUE);
 names(alldata) <- gsub('\\(|\\)',"",names(alldata))    
 
 #create descriptive names
-names(alldata) <- gsub('^t',"Time",names(alldata))
-names(alldata) <- gsub('^f',"Frequency.",names(alldata))
-names(alldata) <- gsub('Freq\\.',"Frequency.",names(alldata))
-names(alldata) <- gsub('Freq$',"Frequency",names(alldata))
-names(alldata) <- gsub('\\-mean',"Mean",names(alldata))
-names(alldata) <- gsub('\\-std',".StandardDev",names(alldata))
 names(alldata) <- gsub('Acc',"Acceleration",names(alldata))
 names(alldata) <- gsub('GyroJerk',"AngularAcceleration",names(alldata))
 names(alldata) <- gsub('Gyro',"AngularSpeed",names(alldata))
 names(alldata) <- gsub('Mag',"Magnitude",names(alldata))
+names(alldata) <- gsub('^t',"TimeDomain.",names(alldata))
+names(alldata) <- gsub('^f',"FrequencyDomain.",names(alldata))
+names(alldata) <- gsub('\\.mean',".Mean",names(alldata))
+names(alldata) <- gsub('\\.std',".StandardDeviation",names(alldata))
+names(alldata) <- gsub('Freq\\.',"Frequency.",names(alldata))
+names(alldata) <- gsub('Freq$',"Frequency",names(alldata))
 
 #5. From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 ##########################################################################################################
+
 # filter  activityLabel column
 alldata_NoActivityType  = alldata[,names(alldata) != 'activityLabel'];
 
 # Summarizing the table to include just the mean of each variable for each activity and each subject
-tidyData    = aggregate(alldata_NoActivityType[,names(alldata_NoActivityType) != c('activityId','subjectId')],by=list(activityId=alldata_NoActivityType$activityId,subjectId = alldata_NoActivityType$subjectId),mean);
+tidyData    = aggregate(alldata_NoActivityType[,!names(alldata_NoActivityType) %in% c('activityId','subjectId')],by=list(activityId=alldata_NoActivityType$activityId,subjectId = alldata_NoActivityType$subjectId),mean);
 
 # Merge data
 tidyData    = merge(tidyData,activityLables,by='activityId',all.x=TRUE);

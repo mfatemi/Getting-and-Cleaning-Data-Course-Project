@@ -4,7 +4,7 @@
 ##Description
 Seet detail information on https://class.coursera.org/getdata-012/
 
-##Output 
+##Output file
 the output is a file named tinyData.txt
 
 ##Source Data
